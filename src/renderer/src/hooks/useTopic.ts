@@ -11,19 +11,27 @@ import type { Assistant, Topic } from '@renderer/types'
 import { findMainTextBlocks } from '@renderer/utils/messageUtils/find'
 import { truncateText } from '@renderer/utils/naming'
 import { find, isEmpty } from 'lodash'
-import { type Dispatch, type SetStateAction, useEffect, useState } from 'react'
+import { type Dispatch, type SetStateAction, useEffect, useRef, useState } from 'react'
 
 import { useAssistant } from './useAssistant'
 import { getStoreSetting } from './useSettings'
 
-let _activeTopic: Topic
-let _setActiveTopic: Dispatch<SetStateAction<Topic>>
+let _activeTopic: Topic | null
+let _setActiveTopic: Dispatch<SetStateAction<Topic | null>>
+let coldStartPending = true
 
 // const logger = loggerService.withContext('useTopic')
 
 export function useActiveTopic(assistantId: string, topic?: Topic) {
   const { assistant } = useAssistant(assistantId)
-  const [activeTopic, setActiveTopic] = useState(topic || _activeTopic || assistant?.topics[0])
+  const shouldStartEmptyRef = useRef(coldStartPending && !topic)
+  coldStartPending = false
+  const [activeTopic, setActiveTopic] = useState<Topic | null>(() => {
+    if (shouldStartEmptyRef.current) {
+      return null
+    }
+    return topic || _activeTopic || assistant?.topics[0] || null
+  })
 
   _activeTopic = activeTopic
   _setActiveTopic = setActiveTopic
@@ -36,18 +44,22 @@ export function useActiveTopic(assistantId: string, topic?: Topic) {
   }, [activeTopic])
 
   useEffect(() => {
+    if (!assistant?.topics || !Array.isArray(assistant.topics) || assistant.topics.length === 0) {
+      return
+    }
+
+    if (!activeTopic) {
+      if (!shouldStartEmptyRef.current) {
+        setActiveTopic(assistant.topics[0])
+      }
+      return
+    }
+
     // activeTopic not in assistant.topics
-    // 确保 assistant 和 assistant.topics 存在，避免在数据未完全加载时访问属性
-    if (
-      assistant &&
-      assistant.topics &&
-      Array.isArray(assistant.topics) &&
-      assistant.topics.length > 0 &&
-      !find(assistant.topics, { id: activeTopic?.id })
-    ) {
+    if (!find(assistant.topics, { id: activeTopic.id })) {
       setActiveTopic(assistant.topics[0])
     }
-  }, [activeTopic?.id, assistant])
+  }, [activeTopic, assistant])
 
   useEffect(() => {
     if (!assistant?.topics?.length || !activeTopic) {
@@ -133,7 +145,7 @@ export const autoRenameTopic = async (assistant: Assistant, topicId: string) => 
 
     const applyTopicName = (name: string) => {
       const data = { ...topic, name } as Topic
-      if (topic.id === _activeTopic.id) {
+      if (_activeTopic && topic.id === _activeTopic.id) {
         _setActiveTopic(data)
       }
       store.dispatch(updateTopic({ assistantId: assistant.id, topic: data }))

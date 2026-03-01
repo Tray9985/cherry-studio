@@ -18,7 +18,7 @@ import Topics from './TopicsTab'
 
 interface Props {
   activeAssistant: Assistant
-  activeTopic: Topic
+  activeTopic: Topic | null
   setActiveAssistant: (assistant: Assistant) => void
   setActiveTopic: (topic: Topic) => void
   position: 'left' | 'right'

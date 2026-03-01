@@ -72,7 +72,7 @@ const getValidatedCachedModels = (assistantId: string): Model[] => {
 interface Props {
   assistant: Assistant
   setActiveTopic: (topic: Topic) => void
-  topic: Topic
+  topic: Topic | null
 }
 
 type ProviderActionHandlers = {
@@ -134,7 +134,16 @@ const Inputbar: FC<Props> = ({ assistant: initialAssistant, setActiveTopic, topi
 }
 
 const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, setActiveTopic, topic, actionsRef }) => {
-  const scope = topic.type ?? TopicType.Chat
+  const draftTopicRef = useRef<Topic>(getDefaultTopic(initialAssistant.id))
+
+  useEffect(() => {
+    if (!topic) {
+      draftTopicRef.current = getDefaultTopic(initialAssistant.id)
+    }
+  }, [initialAssistant.id, topic])
+
+  const activeTopic = topic ?? draftTopicRef.current
+  const scope = activeTopic.type ?? TopicType.Chat
   const config = getInputbarConfig(scope)
 
   const { files, mentionedModels, selectedKnowledgeBases } = useInputbarToolsState()
@@ -164,8 +173,8 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
   const [contextCount, setContextCount] = useState({ current: 0, max: 0 })
 
   const { t } = useTranslation()
-  const { pauseMessages } = useMessageOperations(topic)
-  const loading = useTopicLoading(topic)
+  const { pauseMessages } = useMessageOperations(activeTopic)
+  const loading = useTopicLoading(activeTopic)
   const dispatch = useAppDispatch()
   const isVisionAssistant = useMemo(() => isVisionModel(model), [model])
   const isGenerateImageAssistant = useMemo(() => isGenerateImageModel(model), [model])
@@ -232,6 +241,23 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
         })
       })
 
+  const createTopic = useCallback(async () => {
+    const newTopic = getDefaultTopic(assistant.id)
+
+    await db.topics.add({ id: newTopic.id, messages: [] })
+
+    if (assistant.defaultModel) {
+      setModel(assistant.defaultModel)
+    }
+
+    addTopic(newTopic)
+    setActiveTopic(newTopic)
+
+    setTimeoutTimer('addNewTopic', () => EventEmitter.emit(EVENT_NAMES.SHOW_TOPIC_SIDEBAR), 0)
+
+    return newTopic
+  }, [addTopic, assistant.defaultModel, assistant.id, setActiveTopic, setModel, setTimeoutTimer])
+
   const sendMessage = useCallback(async () => {
     if (checkRateLimit(assistant)) {
       return
@@ -239,16 +265,21 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
 
     logger.info('Starting to send message')
 
+    const topicForSend = topic ?? (await createTopic())
+    if (!topicForSend) {
+      return
+    }
+
     const parent = spanManagerService.startTrace(
-      { topicId: topic.id, name: 'sendMessage', inputs: text },
+      { topicId: topicForSend.id, name: 'sendMessage', inputs: text },
       mentionedModels.length > 0 ? mentionedModels : [assistant.model]
     )
-    EventEmitter.emit(EVENT_NAMES.SEND_MESSAGE, { topicId: topic.id, traceId: parent?.spanContext().traceId })
+    EventEmitter.emit(EVENT_NAMES.SEND_MESSAGE, { topicId: topicForSend.id, traceId: parent?.spanContext().traceId })
 
     try {
       const uploadedFiles = await FileManager.uploadFiles(files)
 
-      const baseUserMessage: MessageInputBaseParams = { assistant, topic, content: text }
+      const baseUserMessage: MessageInputBaseParams = { assistant, topic: topicForSend, content: text }
       if (uploadedFiles) {
         baseUserMessage.files = uploadedFiles
       }
@@ -261,7 +292,7 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
       const { message, blocks } = getUserMessage(baseUserMessage)
       message.traceId = parent?.spanContext().traceId
 
-      dispatch(_sendMessage(message, blocks, assistant, topic.id))
+      dispatch(_sendMessage(message, blocks, assistant, topicForSend.id))
 
       setText('')
       setFiles([])
@@ -279,6 +310,7 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
     text,
     mentionedModels,
     files,
+    createTopic,
     dispatch,
     setText,
     setFiles,
@@ -304,6 +336,9 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
   }, [pauseMessages])
 
   const clearTopic = useCallback(async () => {
+    if (!topic) {
+      return
+    }
     if (loading) {
       await onPause()
       await delay(1)
@@ -314,27 +349,19 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
   }, [focusTextarea, loading, onPause, topic])
 
   const onNewContext = useCallback(() => {
+    if (!topic) {
+      return
+    }
     if (loading) {
       onPause()
       return
     }
     EventEmitter.emit(EVENT_NAMES.NEW_CONTEXT)
-  }, [loading, onPause])
+  }, [loading, onPause, topic])
 
-  const addNewTopic = useCallback(async () => {
-    const newTopic = getDefaultTopic(assistant.id)
-
-    await db.topics.add({ id: newTopic.id, messages: [] })
-
-    if (assistant.defaultModel) {
-      setModel(assistant.defaultModel)
-    }
-
-    addTopic(newTopic)
-    setActiveTopic(newTopic)
-
-    setTimeoutTimer('addNewTopic', () => EventEmitter.emit(EVENT_NAMES.SHOW_TOPIC_SIDEBAR), 0)
-  }, [addTopic, assistant.defaultModel, assistant.id, setActiveTopic, setModel, setTimeoutTimer])
+  const addNewTopic = useCallback(() => {
+    void createTopic()
+  }, [createTopic])
 
   const handleRemoveModel = useCallback(
     (modelToRemove: Model) => {
@@ -419,7 +446,7 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
       focusTextarea()
     }
   }, [
-    topic.id,
+    activeTopic.id,
     assistant.mcpServers,
     assistant.knowledge_bases,
     assistant.enableWebSearch,

@@ -9,7 +9,7 @@ import SessionsTab from './SessionsTab'
 
 interface Props {
   assistant: Assistant
-  activeTopic: Topic
+  activeTopic: Topic | null
   setActiveTopic: (topic: Topic) => void
   position: 'left' | 'right'
 }

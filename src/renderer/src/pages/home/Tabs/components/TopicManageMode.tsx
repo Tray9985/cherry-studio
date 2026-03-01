@@ -67,7 +67,7 @@ export function useTopicManageMode(): TopicManageModeState {
 interface TopicManagePanelProps {
   assistant: Assistant
   assistants: Assistant[]
-  activeTopic: Topic
+  activeTopic: Topic | null
   setActiveTopic: (topic: Topic) => void
   removeTopic: (topic: Topic) => void
   moveTopic: (topic: Topic, toAssistant: Assistant) => void
@@ -152,13 +152,13 @@ export const TopicManagePanel: React.FC<TopicManagePanelProps> = ({
     }
 
     // Switch to first remaining topic if current topic was deleted
-    if (selectedIds.has(activeTopic.id)) {
+    if (activeTopic && selectedIds.has(activeTopic.id)) {
       setActiveTopic(remainingTopics[0])
     }
 
     window.toast.success(t('chat.topics.manage.delete.success', { count: deletedCount }))
     exitManageMode()
-  }, [selectedIds, assistant.topics, removeTopic, activeTopic.id, setActiveTopic, t, exitManageMode])
+  }, [selectedIds, assistant.topics, removeTopic, activeTopic, setActiveTopic, t, exitManageMode])
 
   // Handle move selected topics to another assistant
   const handleMoveSelected = useCallback(
@@ -185,14 +185,14 @@ export const TopicManagePanel: React.FC<TopicManagePanelProps> = ({
       }
 
       // Switch to first remaining topic if current topic was moved
-      if (selectedIds.has(activeTopic.id)) {
+      if (activeTopic && selectedIds.has(activeTopic.id)) {
         setActiveTopic(remainingTopics[0])
       }
 
       window.toast.success(t('chat.topics.manage.move.success', { count: movedCount }))
       exitManageMode()
     },
-    [selectedIds, assistant.topics, assistants, moveTopic, activeTopic.id, setActiveTopic, t, exitManageMode]
+    [selectedIds, assistant.topics, assistants, moveTopic, activeTopic, setActiveTopic, t, exitManageMode]
   )
 
   // Enter search mode

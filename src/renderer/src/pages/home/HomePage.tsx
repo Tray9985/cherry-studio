@@ -55,7 +55,10 @@ const HomePage: FC = () => {
         }
         // 同步更新 active topic，避免不必要的重新渲染
         const newTopic = newAssistant.topics[0]
-        _setActiveTopic((prev) => (newTopic?.id === prev.id ? prev : newTopic))
+        _setActiveTopic((prev) => {
+          if (!prev) return newTopic
+          return newTopic?.id === prev.id ? prev : newTopic
+        })
       })
     },
     [_setActiveTopic, activeAssistant?.id, dispatch]
@@ -64,7 +67,7 @@ const HomePage: FC = () => {
   const setActiveTopic = useCallback(
     (newTopic: Topic) => {
       startTransition(() => {
-        _setActiveTopic((prev) => (newTopic?.id === prev.id ? prev : newTopic))
+        _setActiveTopic((prev) => (newTopic?.id && prev?.id === newTopic.id ? prev : newTopic))
         dispatch(newMessagesActions.setTopicFulfilled({ topicId: newTopic.id, fulfilled: false }))
         dispatch(setActiveTopicOrSessionAction('topic'))
       })

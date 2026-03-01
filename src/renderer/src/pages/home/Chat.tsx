@@ -28,6 +28,7 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
+import ChatEmptyState from './components/ChatEmptyState'
 import ChatNavbar from './components/ChatNavBar'
 import AgentSessionInputbar from './Inputbar/AgentSessionInputbar'
 import { PinnedTodoPanel } from './Inputbar/components/PinnedTodoPanel'
@@ -41,7 +42,7 @@ const logger = loggerService.withContext('Chat')
 
 interface Props {
   assistant: Assistant
-  activeTopic: Topic
+  activeTopic: Topic | null
   setActiveTopic: (topic: Topic) => void
   setActiveAssistant: (assistant: Assistant) => void
 }
@@ -51,7 +52,7 @@ const Chat: FC<Props> = (props) => {
   const { t } = useTranslation()
   const { topicPosition, messageStyle, messageNavigation } = useSettings()
   const { showTopics } = useShowTopics()
-  const { isMultiSelectMode } = useChatContext(props.activeTopic)
+  const { isMultiSelectMode } = useChatContext(props.activeTopic, props.assistant.id)
   const { isTopNavbar } = useNavbarPosition()
   const { chat } = useRuntime()
   const { activeTopicOrSession, activeAgentId, activeSessionIdMap } = chat
@@ -218,23 +219,36 @@ const Chat: FC<Props> = (props) => {
                 style={{ height: `calc(${mainHeight} - var(--navbar-height))` }}>
                 {activeTopicOrSession === 'topic' && (
                   <>
-                    <Messages
-                      key={props.activeTopic.id}
-                      assistant={assistant}
-                      topic={props.activeTopic}
-                      setActiveTopic={props.setActiveTopic}
-                      onComponentUpdate={messagesComponentUpdateHandler}
-                      onFirstUpdate={messagesComponentFirstUpdateHandler}
-                    />
-                    <ContentSearch
-                      ref={contentSearchRef}
-                      searchTarget={mainRef as React.RefObject<HTMLElement>}
-                      filter={contentSearchFilter}
-                      includeUser={filterIncludeUser}
-                      onIncludeUserChange={userOutlinedItemClickHandler}
-                    />
-                    {messageNavigation === 'buttons' && <ChatNavigation containerId="messages" />}
-                    <Inputbar assistant={assistant} setActiveTopic={props.setActiveTopic} topic={props.activeTopic} />
+                    {props.activeTopic ? (
+                      <>
+                        <Messages
+                          key={props.activeTopic.id}
+                          assistant={assistant}
+                          topic={props.activeTopic}
+                          setActiveTopic={props.setActiveTopic}
+                          onComponentUpdate={messagesComponentUpdateHandler}
+                          onFirstUpdate={messagesComponentFirstUpdateHandler}
+                        />
+                        <ContentSearch
+                          ref={contentSearchRef}
+                          searchTarget={mainRef as React.RefObject<HTMLElement>}
+                          filter={contentSearchFilter}
+                          includeUser={filterIncludeUser}
+                          onIncludeUserChange={userOutlinedItemClickHandler}
+                        />
+                        {messageNavigation === 'buttons' && <ChatNavigation containerId="messages" />}
+                        <Inputbar
+                          assistant={assistant}
+                          setActiveTopic={props.setActiveTopic}
+                          topic={props.activeTopic}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <ChatEmptyState />
+                        <Inputbar assistant={assistant} setActiveTopic={props.setActiveTopic} topic={null} />
+                      </>
+                    )}
                   </>
                 )}
                 {activeTopicOrSession === 'session' && !activeAgentId && <AgentInvalid />}
@@ -255,7 +269,7 @@ const Chat: FC<Props> = (props) => {
                     <AgentSessionInputbar agentId={activeAgentId} sessionId={activeSessionId} />
                   </>
                 )}
-                {isMultiSelectMode && <MultiSelectActionPopup topic={props.activeTopic} />}
+                {isMultiSelectMode && props.activeTopic && <MultiSelectActionPopup topic={props.activeTopic} />}
               </div>
             </QuickPanelProvider>
           </Main>

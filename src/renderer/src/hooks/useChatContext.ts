@@ -1,22 +1,41 @@
 import { loggerService } from '@logger'
 import { useMessageOperations } from '@renderer/hooks/useMessageOperations'
+import { getDefaultTopic } from '@renderer/services/AssistantService'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import type { RootState } from '@renderer/store'
 import { messageBlocksSelectors } from '@renderer/store/messageBlock'
 import { selectMessagesForTopic } from '@renderer/store/newMessage'
 import { setActiveTopic, setSelectedMessageIds, toggleMultiSelectMode } from '@renderer/store/runtime'
 import type { Topic } from '@renderer/types'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector, useStore } from 'react-redux'
 
 const logger = loggerService.withContext('useChatContext')
 
-export const useChatContext = (activeTopic: Topic) => {
+export const useChatContext = (activeTopic: Topic | null, assistantId?: string) => {
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const store = useStore<RootState>()
-  const { deleteMessage } = useMessageOperations(activeTopic)
+  const fallbackTopicRef = useRef<Topic | null>(null)
+
+  if (!activeTopic && assistantId && !fallbackTopicRef.current) {
+    fallbackTopicRef.current = getDefaultTopic(assistantId)
+  }
+
+  useEffect(() => {
+    if (!activeTopic && assistantId) {
+      fallbackTopicRef.current = getDefaultTopic(assistantId)
+    }
+  }, [activeTopic, assistantId])
+
+  const resolvedTopic = activeTopic ?? fallbackTopicRef.current
+
+  if (!resolvedTopic) {
+    throw new Error('useChatContext requires activeTopic or assistantId')
+  }
+
+  const { deleteMessage } = useMessageOperations(resolvedTopic)
 
   const [messageRefs, setMessageRefs] = useState<Map<string, HTMLElement>>(new Map())
 
@@ -31,6 +50,9 @@ export const useChatContext = (activeTopic: Topic) => {
   }, [dispatch])
 
   useEffect(() => {
+    if (!activeTopic) {
+      return
+    }
     dispatch(setActiveTopic(activeTopic))
   }, [dispatch, activeTopic])
 
@@ -55,6 +77,9 @@ export const useChatContext = (activeTopic: Topic) => {
 
   const locateMessage = useCallback(
     (messageId: string) => {
+      if (!activeTopic) {
+        return
+      }
       const messageElement = messageRefs.get(messageId)
       if (messageElement) {
         // 检查消息是否可见
@@ -76,7 +101,7 @@ export const useChatContext = (activeTopic: Topic) => {
         messageElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }
     },
-    [messageRefs, store, activeTopic.id]
+    [messageRefs, store, activeTopic]
   )
 
   const handleSelectMessage = useCallback(
@@ -96,6 +121,9 @@ export const useChatContext = (activeTopic: Topic) => {
 
   const handleMultiSelectAction = useCallback(
     async (actionType: string, messageIds: string[]) => {
+      if (!activeTopic) {
+        return
+      }
       if (messageIds.length === 0) {
         window.toast.warning(t('chat.multiple.select.empty'))
         return
@@ -176,7 +204,7 @@ export const useChatContext = (activeTopic: Topic) => {
           break
       }
     },
-    [t, store, activeTopic.id, deleteMessage, handleToggleMultiSelectMode]
+    [t, store, activeTopic, deleteMessage, handleToggleMultiSelectMode]
   )
 
   return {

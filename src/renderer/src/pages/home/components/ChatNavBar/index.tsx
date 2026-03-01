@@ -18,7 +18,7 @@ import ChatNavbarContent from './ChatNavbarContent'
 
 interface Props {
   activeAssistant: Assistant
-  activeTopic: Topic
+  activeTopic: Topic | null
   setActiveTopic: (topic: Topic) => void
   setActiveAssistant: (assistant: Assistant) => void
   position: 'left' | 'right'
