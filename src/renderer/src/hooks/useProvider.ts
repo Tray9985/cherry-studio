@@ -32,10 +32,7 @@ function normalizeProvider<T extends Provider>(provider: T): T {
 const selectProviders = (state: RootState) => state.llm.providers
 
 const selectEnabledProviders = createSelector(selectProviders, (providers) =>
-  providers
-    .map(normalizeProvider)
-    .filter((p) => p.enabled)
-    .concat(CHERRYAI_PROVIDER)
+  providers.map(normalizeProvider).filter((p) => p.enabled)
 )
 
 const selectSystemProviders = createSelector(selectProviders, (providers) =>
