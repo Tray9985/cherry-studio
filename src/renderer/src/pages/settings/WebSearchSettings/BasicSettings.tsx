@@ -1,5 +1,3 @@
-import BaiduLogo from '@renderer/assets/images/search/baidu.svg'
-import BingLogo from '@renderer/assets/images/search/bing.svg'
 import BochaLogo from '@renderer/assets/images/search/bocha.webp'
 import ExaLogo from '@renderer/assets/images/search/exa.png'
 import GoogleLogo from '@renderer/assets/images/search/google.svg'
@@ -41,10 +39,6 @@ const getProviderLogo = (providerId: WebSearchProviderId): string | undefined =>
       return BochaLogo
     case 'local-google':
       return GoogleLogo
-    case 'local-bing':
-      return BingLogo
-    case 'local-baidu':
-      return BaiduLogo
     default:
       return undefined
   }
@@ -60,8 +54,10 @@ const BasicSettings: FC = () => {
 
   const dispatch = useAppDispatch()
 
+  const visibleProviders = providers.filter((provider) => provider.id !== 'local-bing' && provider.id !== 'local-baidu')
+
   const updateSelectedWebSearchProvider = (providerId: string) => {
-    const provider = providers.find((p) => p.id === providerId)
+    const provider = visibleProviders.find((p) => p.id === providerId)
     if (provider) {
       // Check if provider needs API key but doesn't have one
       const needsApiKey = hasObjectKey(provider, 'apiKey')
@@ -87,7 +83,7 @@ const BasicSettings: FC = () => {
   }
 
   // Sort providers: API providers first, then local providers
-  const sortedProviders = [...providers].sort((a, b) => {
+  const sortedProviders = [...visibleProviders].sort((a, b) => {
     const aIsLocal = a.id.startsWith('local')
     const bIsLocal = b.id.startsWith('local')
     if (aIsLocal && !bIsLocal) return 1
