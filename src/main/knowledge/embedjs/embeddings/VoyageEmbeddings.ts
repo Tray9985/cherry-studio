@@ -4,16 +4,24 @@ import { VoyageEmbeddings as _VoyageEmbeddings } from '@langchain/community/embe
 /**
  * 支持设置嵌入维度的模型
  */
+type VoyageEmbeddingsConfig = ConstructorParameters<typeof _VoyageEmbeddings>[0] & {
+  headers?: Record<string, string>
+}
+
 export class VoyageEmbeddings extends BaseEmbeddings {
   private model: _VoyageEmbeddings
-  constructor(private readonly configuration?: ConstructorParameters<typeof _VoyageEmbeddings>[0]) {
+  constructor(private readonly configuration?: VoyageEmbeddingsConfig) {
     super()
     if (!this.configuration) {
       throw new Error('Invalid configuration')
     }
     if (!this.configuration.modelName) this.configuration.modelName = 'voyage-3'
 
-    this.model = new _VoyageEmbeddings(this.configuration)
+    const { headers, ...config } = this.configuration
+    this.model = new _VoyageEmbeddings(config)
+    if (headers) {
+      ;(this.model as { headers?: Record<string, string> }).headers = headers
+    }
   }
   override async getDimensions(): Promise<number> {
     return this.configuration?.outputDimension ?? (this.configuration?.modelName === 'voyage-code-2' ? 1536 : 1024)

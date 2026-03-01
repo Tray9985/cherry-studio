@@ -9,11 +9,12 @@ import { VoyageEmbeddings } from './VoyageEmbeddings'
 export default class EmbeddingsFactory {
   static create({ embedApiClient, dimensions }: { embedApiClient: ApiClient; dimensions?: number }): BaseEmbeddings {
     const batchSize = 10
-    const { model, provider, apiKey, baseURL } = embedApiClient
+    const { model, provider, apiKey, baseURL, headers } = embedApiClient
     if (provider === 'voyageai') {
       return new VoyageEmbeddings({
         modelName: model,
         apiKey,
+        headers,
         outputDimension: dimensions,
         batchSize: 8
       })
@@ -24,7 +25,8 @@ export default class EmbeddingsFactory {
         baseUrl: baseURL.replace(/\/api$/, ''),
         requestOptions: {
           // @ts-ignore expected
-          'encoding-format': 'float'
+          'encoding-format': 'float',
+          headers
         }
       })
     }
@@ -34,7 +36,7 @@ export default class EmbeddingsFactory {
       apiKey,
       dimensions,
       batchSize,
-      configuration: { baseURL, fetch: net.fetch as typeof fetch }
+      configuration: { baseURL, fetch: net.fetch as typeof fetch, defaultHeaders: headers }
     })
   }
 }

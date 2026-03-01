@@ -24,6 +24,7 @@ import { routeToEndpoint } from '@renderer/utils'
 import type { ExtractResults } from '@renderer/utils/extract'
 import { createCitationBlock } from '@renderer/utils/messageUtils/create'
 import { isAzureOpenAIProvider, isGeminiProvider } from '@renderer/utils/provider'
+import { defaultAppHeaders } from '@shared/utils'
 import type { ModelMessage, UserModelMessage } from 'ai'
 import { isEmpty } from 'lodash'
 
@@ -85,7 +86,11 @@ export const getKnowledgeBaseParams = (base: KnowledgeBase): KnowledgeBaseParams
       model: base.model.id,
       provider: base.model.provider,
       apiKey: aiProvider.getApiKey() || 'secret',
-      baseURL
+      baseURL,
+      headers: {
+        ...defaultAppHeaders(),
+        ...actualProvider.extra_headers
+      }
     },
     chunkSize,
     chunkOverlap: base.chunkOverlap,

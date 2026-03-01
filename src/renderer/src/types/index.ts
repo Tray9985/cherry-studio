@@ -588,6 +588,7 @@ export type ApiClient = {
   apiKey: string
   apiVersion?: string
   baseURL: string
+  headers?: Record<string, string>
 }
 
 export type GenerateImageParams = {
