@@ -15,18 +15,10 @@ describe('EmojiIcon', () => {
     expect(background?.textContent).toContain('🚀')
   })
 
-  it('should render default emoji when no emoji provided', () => {
+  it('should render nothing when no emoji provided', () => {
     const { container } = render(<EmojiIcon emoji="" />)
 
-    // Background should have default star emoji
-    const background = container.querySelector('div > div')
-    expect(background?.textContent).toContain('⭐️')
-
-    // Foreground should be empty (the actual emoji prop value)
-    const emojiContainer = container.firstChild as HTMLElement
-    // Remove background text to get only foreground text
-    const foregroundText = emojiContainer.textContent?.replace(background?.textContent || '', '')
-    expect(foregroundText).toBe('')
+    expect(container.firstChild).toBeNull()
   })
 
   it('should apply custom className', () => {
@@ -62,9 +54,7 @@ describe('EmojiIcon', () => {
 
   it('should handle empty string emoji', () => {
     const { container } = render(<EmojiIcon emoji="" />)
-    const backgroundElement = container.querySelector('div > div')
 
-    // Should show default emoji in background when emoji is empty
-    expect(backgroundElement?.textContent).toContain('⭐️')
+    expect(container.firstChild).toBeNull()
   })
 })

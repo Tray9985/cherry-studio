@@ -9,9 +9,13 @@ interface EmojiIconProps {
 }
 
 const EmojiIcon: FC<EmojiIconProps> = ({ emoji, className, size = 26, fontSize = 15 }) => {
+  if (!emoji) {
+    return null
+  }
+
   return (
     <Container className={className} $size={size} $fontSize={fontSize}>
-      <EmojiBackground>{emoji || '⭐️'}</EmojiBackground>
+      <EmojiBackground>{emoji}</EmojiBackground>
       {emoji}
     </Container>
   )
