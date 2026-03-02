@@ -704,6 +704,8 @@ export type WebSearchProvider = {
   topicId?: string
   parentSpanId?: string
   modelName?: string
+  exaSearchType?: 'auto' | 'instant' | 'deep'
+  exaUseHighlights?: boolean
 }
 
 export type WebSearchProviderResult = {

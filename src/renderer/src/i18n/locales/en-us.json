@@ -5260,6 +5260,21 @@
         "content_limit": "Content length limit",
         "content_limit_tooltip": "Limit the content length of the search results; content that exceeds the limit will be truncated.",
         "default_provider": "Default Provider",
+        "exa": {
+          "highlights": {
+            "label": "Highlights",
+            "tooltip": "Use highlights instead of full text for faster, shorter results."
+          },
+          "search_type": {
+            "label": "Search Type",
+            "options": {
+              "auto": "Auto",
+              "deep": "Deep",
+              "instant": "Instant"
+            }
+          },
+          "title": "Exa Search"
+        },
         "free": "Free",
         "is_default": "Default",
         "local_provider": {

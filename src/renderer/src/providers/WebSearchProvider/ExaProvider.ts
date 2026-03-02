@@ -26,13 +26,16 @@ export default class ExaProvider extends BaseWebSearchProvider {
         throw new Error('Search query cannot be empty')
       }
 
+      const searchType = this.provider.exaSearchType || 'auto'
+      const useHighlights = this.provider.exaUseHighlights ?? false
+      const contents = useHighlights ? { highlights: true } : { text: true }
+
       const response = await this.exa.search({
         query,
         numResults: Math.max(1, websearch.maxResults),
-        contents: {
-          text: true
-        }
-      })
+        contents,
+        type: searchType
+      } as unknown as Parameters<ExaClient['search']>[0])
 
       return {
         query: response.autopromptString,

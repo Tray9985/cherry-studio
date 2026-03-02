@@ -5260,6 +5260,21 @@
         "content_limit": "Limite de longueur du contenu",
         "content_limit_tooltip": "Limiter la longueur du contenu des résultats de recherche ; le contenu dépassant cette limite sera tronqué",
         "default_provider": "Fournisseur par défaut",
+        "exa": {
+          "highlights": {
+            "label": "[to be translated]:Highlights",
+            "tooltip": "[to be translated]:Use highlights instead of full text for faster, shorter results."
+          },
+          "search_type": {
+            "label": "[to be translated]:Search Type",
+            "options": {
+              "auto": "[to be translated]:Auto",
+              "deep": "[to be translated]:Deep",
+              "instant": "[to be translated]:Instant"
+            }
+          },
+          "title": "[to be translated]:Exa Search"
+        },
         "free": "Gratuit",
         "is_default": "Défaut",
         "local_provider": {

@@ -5260,6 +5260,21 @@
         "content_limit": "内容长度限制",
         "content_limit_tooltip": "限制搜索结果的内容长度, 超过限制的内容将被截断",
         "default_provider": "默认搜索引擎",
+        "exa": {
+          "highlights": {
+            "label": "高亮摘要",
+            "tooltip": "使用高亮片段代替全文，速度更快，内容更短。"
+          },
+          "search_type": {
+            "label": "搜索类型",
+            "options": {
+              "auto": "自动",
+              "deep": "深度",
+              "instant": "极速"
+            }
+          },
+          "title": "Exa 搜索"
+        },
         "free": "免费",
         "is_default": "默认搜索",
         "local_provider": {

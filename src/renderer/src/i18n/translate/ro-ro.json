@@ -5260,6 +5260,21 @@
         "content_limit": "Limită lungime conținut",
         "content_limit_tooltip": "Limitează lungimea conținutului rezultatelor căutării; conținutul care depășește limita va fi trunchiat.",
         "default_provider": "Furnizor implicit",
+        "exa": {
+          "highlights": {
+            "label": "[to be translated]:Highlights",
+            "tooltip": "[to be translated]:Use highlights instead of full text for faster, shorter results."
+          },
+          "search_type": {
+            "label": "[to be translated]:Search Type",
+            "options": {
+              "auto": "[to be translated]:Auto",
+              "deep": "[to be translated]:Deep",
+              "instant": "[to be translated]:Instant"
+            }
+          },
+          "title": "[to be translated]:Exa Search"
+        },
         "free": "Gratuit",
         "is_default": "Implicit",
         "local_provider": {

@@ -16,7 +16,7 @@ import { useDefaultWebSearchProvider, useWebSearchProvider } from '@renderer/hoo
 import WebSearchService from '@renderer/services/WebSearchService'
 import type { WebSearchProviderId } from '@renderer/types'
 import { formatApiKeys, hasObjectKey } from '@renderer/utils'
-import { Button, Divider, Flex, Form, Input, Space, Tooltip } from 'antd'
+import { Button, Divider, Flex, Form, Input, Select, Space, Switch, Tooltip } from 'antd'
 import Link from 'antd/es/typography/Link'
 import { Info, List } from 'lucide-react'
 import type { FC } from 'react'
@@ -24,7 +24,16 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
-import { SettingDivider, SettingHelpLink, SettingHelpText, SettingHelpTextRow, SettingSubtitle, SettingTitle } from '..'
+import {
+  SettingDivider,
+  SettingHelpLink,
+  SettingHelpText,
+  SettingHelpTextRow,
+  SettingRow,
+  SettingRowTitle,
+  SettingSubtitle,
+  SettingTitle
+} from '..'
 
 const logger = loggerService.withContext('WebSearchProviderSetting')
 interface Props {
@@ -41,6 +50,8 @@ const WebSearchProviderSetting: FC<Props> = ({ providerId }) => {
   const [basicAuthUsername, setBasicAuthUsername] = useState(provider.basicAuthUsername || '')
   const [basicAuthPassword, setBasicAuthPassword] = useState(provider.basicAuthPassword || '')
   const [apiValid, setApiValid] = useState(false)
+  const [exaSearchType, setExaSearchType] = useState(provider.exaSearchType || 'auto')
+  const [exaUseHighlights, setExaUseHighlights] = useState(provider.exaUseHighlights ?? false)
   const { setTimeoutTimer } = useTimer()
 
   const webSearchProviderConfig = WEB_SEARCH_PROVIDER_CONFIG[provider.id]
@@ -83,6 +94,16 @@ const WebSearchProviderSetting: FC<Props> = ({ providerId }) => {
     } else {
       setBasicAuthPassword(provider.basicAuthPassword || '')
     }
+  }
+
+  const handleExaSearchTypeChange = (value: 'auto' | 'instant' | 'deep') => {
+    setExaSearchType(value)
+    updateProvider({ exaSearchType: value })
+  }
+
+  const handleExaHighlightsChange = (checked: boolean) => {
+    setExaUseHighlights(checked)
+    updateProvider({ exaUseHighlights: checked })
   }
 
   const openApiKeyList = async () => {
@@ -138,7 +159,16 @@ const WebSearchProviderSetting: FC<Props> = ({ providerId }) => {
     setApiHost(provider.apiHost ?? '')
     setBasicAuthUsername(provider.basicAuthUsername ?? '')
     setBasicAuthPassword(provider.basicAuthPassword ?? '')
-  }, [provider.apiKey, provider.apiHost, provider.basicAuthUsername, provider.basicAuthPassword])
+    setExaSearchType(provider.exaSearchType || 'auto')
+    setExaUseHighlights(provider.exaUseHighlights ?? false)
+  }, [
+    provider.apiKey,
+    provider.apiHost,
+    provider.basicAuthUsername,
+    provider.basicAuthPassword,
+    provider.exaSearchType,
+    provider.exaUseHighlights
+  ])
 
   const getWebSearchProviderLogo = (providerId: WebSearchProviderId) => {
     switch (providerId) {
@@ -165,6 +195,7 @@ const WebSearchProviderSetting: FC<Props> = ({ providerId }) => {
   }
 
   const isLocalProvider = provider.id.startsWith('local')
+  const isExaProvider = provider.id === 'exa'
 
   const openLocalProviderSettings = async () => {
     if (officialWebsite) {
@@ -188,6 +219,12 @@ const WebSearchProviderSetting: FC<Props> = ({ providerId }) => {
       setDefaultProvider(provider)
     }
   }
+
+  const exaSearchTypeOptions = [
+    { value: 'auto', label: t('settings.tool.websearch.exa.search_type.options.auto') },
+    { value: 'instant', label: t('settings.tool.websearch.exa.search_type.options.instant') },
+    { value: 'deep', label: t('settings.tool.websearch.exa.search_type.options.deep') }
+  ]
 
   return (
     <>
@@ -289,6 +326,32 @@ const WebSearchProviderSetting: FC<Props> = ({ providerId }) => {
               onBlur={onUpdateApiHost}
             />
           </Flex>
+        </>
+      )}
+      {isExaProvider && (
+        <>
+          <SettingDivider style={{ marginTop: 12, marginBottom: 12 }} />
+          <SettingSubtitle style={{ marginTop: 5, marginBottom: 10 }}>
+            {t('settings.tool.websearch.exa.title')}
+          </SettingSubtitle>
+          <SettingRow>
+            <SettingRowTitle>{t('settings.tool.websearch.exa.search_type.label')}</SettingRowTitle>
+            <Select
+              value={exaSearchType}
+              onChange={handleExaSearchTypeChange}
+              options={exaSearchTypeOptions}
+              style={{ width: 'min(260px, 60%)' }}
+            />
+          </SettingRow>
+          <SettingRow>
+            <SettingRowTitle>
+              {t('settings.tool.websearch.exa.highlights.label')}
+              <Tooltip title={t('settings.tool.websearch.exa.highlights.tooltip')} placement="right">
+                <Info size={16} color="var(--color-icon)" style={{ marginLeft: 5, cursor: 'pointer' }} />
+              </Tooltip>
+            </SettingRowTitle>
+            <Switch checked={exaUseHighlights} onChange={handleExaHighlightsChange} />
+          </SettingRow>
         </>
       )}
       {!isLocalProvider && hasObjectKey(provider, 'basicAuthUsername') && (

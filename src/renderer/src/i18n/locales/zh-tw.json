@@ -5260,6 +5260,21 @@
         "content_limit": "內容長度限制",
         "content_limit_tooltip": "限制搜尋結果的內容長度；超過限制的內容將被截斷。",
         "default_provider": "預設搜尋引擎",
+        "exa": {
+          "highlights": {
+            "label": "[to be translated]:Highlights",
+            "tooltip": "[to be translated]:Use highlights instead of full text for faster, shorter results."
+          },
+          "search_type": {
+            "label": "[to be translated]:Search Type",
+            "options": {
+              "auto": "[to be translated]:Auto",
+              "deep": "[to be translated]:Deep",
+              "instant": "[to be translated]:Instant"
+            }
+          },
+          "title": "[to be translated]:Exa Search"
+        },
         "free": "免費",
         "is_default": "預設",
         "local_provider": {

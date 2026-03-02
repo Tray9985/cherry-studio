@@ -5260,6 +5260,21 @@
         "content_limit": "Όριο μήκους περιεχομένου",
         "content_limit_tooltip": "Περιορίζει το μήκος του περιεχομένου των αποτελεσμάτων αναζήτησης, το περιεχόμενο πέραν του ορίου θα περικοπεί",
         "default_provider": "Προεπιλεγμένος Πάροχος",
+        "exa": {
+          "highlights": {
+            "label": "[to be translated]:Highlights",
+            "tooltip": "[to be translated]:Use highlights instead of full text for faster, shorter results."
+          },
+          "search_type": {
+            "label": "[to be translated]:Search Type",
+            "options": {
+              "auto": "[to be translated]:Auto",
+              "deep": "[to be translated]:Deep",
+              "instant": "[to be translated]:Instant"
+            }
+          },
+          "title": "[to be translated]:Exa Search"
+        },
         "free": "Δωρεάν",
         "is_default": "Προεπιλογή",
         "local_provider": {
