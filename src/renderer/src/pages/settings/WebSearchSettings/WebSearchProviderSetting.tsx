@@ -343,6 +343,7 @@ const WebSearchProviderSetting: FC<Props> = ({ providerId }) => {
               style={{ width: 'min(260px, 60%)' }}
             />
           </SettingRow>
+          <SettingDivider />
           <SettingRow>
             <SettingRowTitle>
               {t('settings.tool.websearch.exa.highlights.label')}
