@@ -223,7 +223,7 @@ const TabsContainer: React.FC<TabsContainerProps> = ({ children }) => {
     navigate(tab.path)
   }
 
-  const visibleTabs = useMemo(() => tabs.filter((tab) => !specialTabs.includes(tab.id)), [tabs])
+  const visibleTabs = useMemo(() => tabs.filter((tab) => !specialTabs.includes(tab.id) && tab.id !== 'agents'), [tabs])
 
   const { onSortEnd } = useDndReorder<Tab>({
     originalList: tabs,
