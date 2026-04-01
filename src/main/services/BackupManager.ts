@@ -211,7 +211,7 @@ class BackupManager {
       const backupedFilePath = path.join(destinationPath, fileName)
       const output = fs.createWriteStream(backupedFilePath)
       const archive = archiver('zip', {
-        zlib: { level: 0 }, // No compression - data is already compressed by LevelDB
+        zlib: { level: 1 }, // Use lowest compression level for speed (same as legacy backup)
         zip64: true
       })
 
@@ -600,7 +600,7 @@ class BackupManager {
 
       //  Restore Data directory
       const dataSource = path.join(this.tempDir, 'Data')
-      const dataDest = path.join(getDataPath(), restoreSuffix)
+      const dataDest = path.join(userDataPath, 'Data' + restoreSuffix)
       const dataExists = await fs.pathExists(dataSource)
       const dataFiles = dataExists ? await fs.readdir(dataSource) : []
 
@@ -658,8 +658,9 @@ class BackupManager {
 
       // Restore Data directory
       const restoreSuffix = isWin ? '.restore' : ''
+      const userDataPath = app.getPath('userData')
       const dataSourcePath = path.join(this.tempDir, 'Data')
-      const dataDestPath = path.join(getDataPath(), restoreSuffix)
+      const dataDestPath = path.join(userDataPath, 'Data' + restoreSuffix)
 
       const dataExists = await fs.pathExists(dataSourcePath)
       const dataFiles = dataExists ? await fs.readdir(dataSourcePath) : []
@@ -775,7 +776,7 @@ class BackupManager {
       }
       await new Promise<void>((resolve, reject) => {
         const writeStream = fs.createWriteStream(backupedFilePath)
-        writeStream.write(retrievedFile as Buffer)
+        writeStream.write(retrievedFile)
         writeStream.end()
         writeStream.on('finish', () => resolve())
         writeStream.on('error', (error) => reject(error))

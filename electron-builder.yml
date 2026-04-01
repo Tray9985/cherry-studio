@@ -140,34 +140,22 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    Cherry Studio 1.8.1 - Quick Fixes
-
-    🐛 Bug Fixes
-    - [Agents] Fix thinking mode 400 error on non-Anthropic providers
-    - [Windows] Fix Windows Terminal launch failing on non-English systems
-    - [Windows] Fix CLI tools (qwen-code, Copilot CLI) failing to start on Windows
-    - [Azure] Fix dated API versions routing to wrong transport
-    - [Editor] Fix Zed editor unable to open directories from agent workspace
+    Cherry Studio 1.8.4 - Bug Fixes and New Features
 
     ✨ New Features
-    - [Agents] Clickable file paths in tool outputs — click to open files, with dropdown to reveal in Finder or open in external editors
+    - [API] Add knowledge base REST API endpoints
+    - [SelectionAssistant] Add Linux support for text selection toolbar
 
-    💄 Improvements
-    - [Backup] Enhanced backup system with new format (v6), improved security, and config.json now included in backups
+    🐛 Bug Fixes
+    - [Files] Fix PDF upload failing with "invalid part type: file" error for OpenAI-compatible providers (Moonshot, DeepSeek, Groq, etc.)
 
     <!--LANG:zh-CN-->
-    Cherry Studio 1.8.1 - 快速修复
-
-    🐛 问题修复
-    - [智能体] 修复非 Anthropic 服务商思考模式 400 错误
-    - [Windows] 修复 Windows Terminal 在非英语系统上启动失败的问题
-    - [Windows] 修复 CLI 工具（qwen-code、Copilot CLI）在 Windows 上启动失败的问题
-    - [Azure] 修复特定版本的 API 路由到错误传输方式的问题
-    - [编辑器] 修复 Zed 编辑器无法从智能体工作区打开目录的问题
+    Cherry Studio 1.8.4 - 错误修复和新功能
 
     ✨ 新功能
-    - [智能体] 工具输出中的文件路径可点击 — 点击打开文件，下拉菜单可显示在访达中或在外部编辑器中打开
+    - [API] 添加知识库 REST API 端点
+    - [选择助手] 为文本选择工具栏添加 Linux 支持
 
-    💄 改进
-    - [备份] 增强备份系统，新增格式（v6）、改进安全性，config.json 现已包含在备份中
+    🐛 问题修复
+    - [文件] 修复 OpenAI 兼容提供商（Moonshot、DeepSeek、Groq 等）的 PDF 上传失败问题（"invalid part type: file" 错误）
     <!--LANG:END-->
